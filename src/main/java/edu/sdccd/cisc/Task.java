@@ -1,4 +1,4 @@
 package edu.sdccd.cisc;
 
-public class s {
+public class Task {
 }
