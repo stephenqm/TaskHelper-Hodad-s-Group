@@ -18,4 +18,5 @@ import javafx.util.converter.LocalDateStringConverter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class Main extends Application
+public class Interface extends Application {
+}
