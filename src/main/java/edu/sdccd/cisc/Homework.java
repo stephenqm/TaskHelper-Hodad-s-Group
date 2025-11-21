@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 public class Homework extends Task {
 
-    private Subject subject;        // ← now a separate class
+    private Subject subject;
     private int estimatedMinutes;
 
     public Homework(String title, String description, byte priority, LocalDateTime startDate, LocalDateTime endDate, LocalDateTime dueDate, Subject subject, int estimatedMinutes) {
