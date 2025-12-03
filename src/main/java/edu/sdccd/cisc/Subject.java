@@ -13,7 +13,7 @@ public class Subject {
     public String getName() {
         return name;
     }
-    
+
     // override
     @Override
     public String toString() {

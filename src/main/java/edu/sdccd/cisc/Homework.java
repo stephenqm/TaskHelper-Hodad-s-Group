@@ -16,7 +16,7 @@ public class Homework extends Task {
 
     }
 
-    // getters
+    // getter
     public Subject getSubject() { return subject; }
     public int getEstimatedMinutes() { return estimatedMinutes; }
 
