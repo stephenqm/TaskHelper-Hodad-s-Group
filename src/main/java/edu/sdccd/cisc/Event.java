@@ -1,86 +1,97 @@
 package edu.sdccd.cisc;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
- * Event: represents scheduled events; extends Task.
+ * Event - Represents scheduled events (meetings, appointments, etc.)
+ * Demonstrates: Topic 8 - Inheritance and Polymorphism
+ * Extends Task to add event-specific fields
  */
 public class Event extends Task {
 
+    // Topic 7: Additional fields specific to events
     private String location;
     private String organizer;
 
+    // Topic 8: Constructor that calls parent constructor
     public Event(String title, String description, byte priority,
                  LocalDateTime startDate, LocalDateTime endDate,
                  String location, String organizer) {
-        // call Task constructor (use dueDate = endDate by default)
+        // Call parent Task constructor
         super(title, description, priority, startDate, endDate, endDate);
-        this.location = location;
-        this.organizer = organizer;
+        this.location = location != null ? location : "";
+        this.organizer = organizer != null ? organizer : "";
     }
 
+    // Simplified constructor
+    public Event(String title, String description,
+                 LocalDateTime startDate, LocalDateTime endDate,
+                 String location) {
+        this(title, description, (byte) 2, startDate, endDate, location, "");
+    }
+
+    // Topic 7: Getters and setters for encapsulation
     public String getLocation() { return location; }
     public String getOrganizer() { return organizer; }
-    public void setLocation(String location) { this.location = location; }
-    public void setOrganizer(String organizer) { this.organizer = organizer; }
+    public void setLocation(String location) {
+        this.location = location != null ? location : "";
+    }
+    public void setOrganizer(String organizer) {
+        this.organizer = organizer != null ? organizer : "";
+    }
 
+    // Topic 8: Polymorphism - Override parent method
     @Override
-    public void displayDetails() {
-        System.out.println("----- EVENT -----");
+    public void displayInfo() {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        System.out.println("=== EVENT ===");
         System.out.println("Title: " + getTitle());
         System.out.println("Description: " + getDescription());
         System.out.println("Location: " + location);
         System.out.println("Organizer: " + organizer);
-        System.out.println("Start: " + (getStartDate() != null ? getStartDate().format(FILE_FMT) : "N/A"));
-        System.out.println("End:   " + (getEndDate()   != null ? getEndDate().format(FILE_FMT)   : "N/A"));
-        System.out.println("-----------------");
+        System.out.println("Start: " + (getStartDate() != null ? getStartDate().format(fmt) : "N/A"));
+        System.out.println("End: " + (getEndDate() != null ? getEndDate().format(fmt) : "N/A"));
+        System.out.println("Status: " + (isCompleted() ? "COMPLETED" : "SCHEDULED"));
+        System.out.println("=============");
     }
 
-    // override toDataLine to label as EVENT and include location/organizer in extras
+    // Topic 8: Override serialize method for file storage
     @Override
-    public String toDataLine() {
+    public String serialize() {
         String sStart = getStartDate() == null ? "" : getStartDate().format(FILE_FMT);
-        String sEnd   = getEndDate()   == null ? "" : getEndDate().format(FILE_FMT);
-        String sDue   = getDueDate()   == null ? "" : getDueDate().format(FILE_FMT);
-        return String.join(",",
-                "EVENT",
-                escape(getTitle()),
-                escape(getDescription()),
-                Byte.toString(getPriority()),
-                sStart,
-                sEnd,
-                sDue,
-                escape(location),
-                escape(organizer),
-                Boolean.toString(isCompleted())
-        );
+        String sEnd = getEndDate() == null ? "" : getEndDate().format(FILE_FMT);
+        String sDue = getDueDate() == null ? "" : getDueDate().format(FILE_FMT);
+
+        return "EVENT|" + escape(getTitle()) + "|" + escape(getDescription()) + "|"
+                + getPriority() + "|" + sStart + "|" + sEnd + "|" + sDue + "|"
+                + escape(location) + "|" + escape(organizer) + "|" + isCompleted();
     }
 
-    // parser
-    public static Event fromDataParts(String[] parts) {
-        // parts[0] == "EVENT"
-        String title = unescape(parts[1]);
-        String desc  = unescape(parts[2]);
-        byte priority = 1;
-        try { priority = Byte.parseByte(parts[3]); } catch (Exception ignored) {}
-        LocalDateTime start = parseOrNull(parts[4]);
-        LocalDateTime end   = parseOrNull(parts[5]);
-        // parts[6] dueDate (we set due=end)
-        String location = parts.length > 7 ? unescape(parts[7]) : "";
-        String organizer= parts.length > 8 ? unescape(parts[8]) : "";
-        boolean completed = parts.length > 9 && Boolean.parseBoolean(parts[9]);
-        Event e = new Event(title, desc, priority, start, end, location, organizer);
-        e.setCompleted(completed);
-        return e;
+    // Topic 10: Static factory method with exception handling
+    public static Event deserialize(String[] parts) {
+        try {
+            String title = unescape(parts[1]);
+            String desc = unescape(parts[2]);
+            byte priority = Byte.parseByte(parts[3]);
+            LocalDateTime start = parseDateTime(parts[4]);
+            LocalDateTime end = parseDateTime(parts[5]);
+            String location = unescape(parts[7]);
+            String organizer = unescape(parts[8]);
+            boolean completed = Boolean.parseBoolean(parts[9]);
+
+            Event event = new Event(title, desc, priority, start, end, location, organizer);
+            event.setCompleted(completed);
+            return event;
+        } catch (Exception e) {
+            System.err.println("Error deserializing event: " + e.getMessage());
+            return null;
+        }
     }
 
-    // reuse escape/unescape defined in Task (they are private there); duplicate simple versions here:
-    private static String escape(String s) {
-        if (s == null) return "";
-        return s.replace("\n", "\\n").replace(",", "\\,");
-    }
-    private static String unescape(String s) {
-        if (s == null) return "";
-        return s.replace("\\n", "\n").replace("\\,", ",");
+    // Topic 12: Override toString for better display
+    @Override
+    public String toString() {
+        return "[EVENT] " + getTitle() + " @ " + location;
     }
 }
