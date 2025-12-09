@@ -1,27 +1,25 @@
+
 package edu.sdccd.cisc;
 
 import java.time.LocalDateTime;
 
+/**
+ * Scheduleable Interface
+ * Demonstrates: Topic 8 - Interfaces and Polymorphism
+ * Defines contract for all scheduleable items (Task, Event, Homework)
+ */
 public interface Scheduleable {
 
-    // Returns the start date/time of the item
+    // Topic 8: Interface method declarations (abstract by default)
     LocalDateTime getStartDate();
-
-    // Returns the end date/time of the item
     LocalDateTime getEndDate();
-
-    // Returns the due date, if applicable
     LocalDateTime getDueDate();
-
-    // Checks if the item is completed
     boolean isCompleted();
-
-    // Sets the completion status
     void setCompleted(boolean completed);
 
-    // Displays info about this schedulable item
-    void displayTaskInfo();
+    // Display information about this scheduleable item
+    void displayInfo();
 
-    // Converts the item to a string for saving/loading
+    // Convert to string for file storage
     String serialize();
 }
