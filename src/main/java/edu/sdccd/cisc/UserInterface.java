@@ -1,3 +1,4 @@
+
 package edu.sdccd.cisc;
 
 import javafx.application.Application;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 public class UserInterface extends Application {
     //create table gui and Array lists to hold data
     private TableView<ScheduleableRow> tableView;
+    private ClockDisplay clockDisplay;
     private ArrayList<Scheduleable> scheduleables = new ArrayList<>();
     private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     //launch
@@ -26,6 +28,10 @@ public class UserInterface extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("Task Helper");
+
+        // Create the clock display
+        clockDisplay = new ClockDisplay();
+
         //display stuff
         tableView = new TableView<>();
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); //for column size
@@ -94,13 +100,17 @@ public class UserInterface extends Application {
         addHomework.setOnAction(e -> showHomeworkForm());
         addEvent.setOnAction(e -> showEventForm());
 
-        ToolBar toolbar = new ToolBar(addMenu);
+        ToolBar toolbar = new ToolBar(addMenu, clockDisplay);
 
         VBox layout = new VBox(10, toolbar, tableView);
         layout.setPadding(new Insets(10));
 
         Scene scene = new Scene(layout, 1000, 500);
         stage.setScene(scene);
+
+        // Stop the clock when window closes
+        stage.setOnCloseRequest(e -> clockDisplay.stop());
+
         stage.show();
 
         showTodayItems();
