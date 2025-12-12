@@ -5,10 +5,7 @@ package edu.sdccd.cisc;
  */
 public class Main {
     public static void main(String[] args) {
-        System.out.println("==========================================");
         System.out.println("   Task Helper - Productivity Manager");
-        System.out.println("==========================================\n");
-
         try {
             // Launch JavaFX application
             UserInterface.main(args);

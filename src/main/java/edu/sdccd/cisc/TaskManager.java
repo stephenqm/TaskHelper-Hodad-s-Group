@@ -52,7 +52,7 @@ public class TaskManager {
         homeworkList.remove(homework);
     }
 
-    // === GET METHODS ===
+    // GET METHOD
 
     public ArrayList<Task> getAllTasks() {
         return tasks;

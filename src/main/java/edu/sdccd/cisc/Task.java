@@ -18,7 +18,7 @@ public class Task implements Scheduleable {
     private LocalDateTime endDate;
     private LocalDateTime dueDate;
     private boolean completed; // Topic 2: boolean type
-    private int estimatedMinutes; // Topic 2: int type
+    private int estimatedMinutes; // Topic 2: int type3
 
     // Topic 12: Coding standards - constant for date formatting
     public static final DateTimeFormatter FILE_FMT =
@@ -172,6 +172,7 @@ public class Task implements Scheduleable {
             return null;
         }
         try {
+            // Topic 4: Throwing custom exceptions
             return LocalDateTime.parse(s, FILE_FMT);
         } catch (Exception e) {
             return null;
