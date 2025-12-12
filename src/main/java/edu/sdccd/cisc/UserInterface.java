@@ -1,4 +1,3 @@
-
 package edu.sdccd.cisc;
 
 import javafx.application.Application;
@@ -18,8 +17,10 @@ public class UserInterface extends Application {
     //create table gui and Array lists to hold data
     private TableView<ScheduleableRow> tableView;
     private ClockDisplay clockDisplay;
+    private TaskManager taskManager;
     private ArrayList<Scheduleable> scheduleables = new ArrayList<>();
     private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     //launch
     public static void main(String[] args) {
         launch(args);
@@ -28,6 +29,18 @@ public class UserInterface extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("Task Helper");
+
+        // Initialize TaskManager and load existing data
+        taskManager = new TaskManager();
+        try {
+            taskManager.loadFromFile();
+            // Load all items from TaskManager into scheduleables
+            scheduleables.addAll(taskManager.getAllTasks());
+            scheduleables.addAll(taskManager.getAllEvents());
+            scheduleables.addAll(taskManager.getAllHomework());
+        } catch (Exception e) {
+            System.out.println("No previous data to load.");
+        }
 
         // Create the clock display
         clockDisplay = new ClockDisplay();
@@ -154,7 +167,7 @@ public class UserInterface extends Application {
             }
 
             if (dt != null && dt.toLocalDate().isEqual(today.toLocalDate())) {
-                tableView.getItems().add(new ScheduleableRow(s, dt.format(fmt), category, title, desc, priority, minutes));
+                tableView.getItems().add(new ScheduleableRow(s, dt.format(fmt), category, title, desc, priority, minutes, this));
             }
         }
     }
@@ -203,6 +216,8 @@ public class UserInterface extends Application {
         //if tasks are inputted, it will be added to scheduleable
         dialog.showAndWait().ifPresent(task -> {
             scheduleables.add(task);
+            taskManager.addTask(task);
+            saveToFile();
             showTodayItems();
         });
     }
@@ -254,6 +269,8 @@ public class UserInterface extends Application {
 
         dialog.showAndWait().ifPresent(hw -> {
             scheduleables.add(hw);
+            taskManager.addHomework(hw);
+            saveToFile();
             showTodayItems();
         });
     }
@@ -305,9 +322,21 @@ public class UserInterface extends Application {
 
         dialog.showAndWait().ifPresent(ev -> {
             scheduleables.add(ev);
+            taskManager.addEvent(ev);
+            saveToFile();
             showTodayItems();
         });
     }
+
+    // Save all data to file
+    private void saveToFile() {
+        try {
+            taskManager.saveToFile();
+        } catch (Exception e) {
+            System.err.println("Error saving: " + e.getMessage());
+        }
+    }
+
     //fields to store each row of thing when the gui updates
     public static class ScheduleableRow {
         private final Scheduleable scheduleable;
@@ -321,7 +350,7 @@ public class UserInterface extends Application {
 
         //constructor for converting data into row format
         public ScheduleableRow(Scheduleable s, String dateTime, String category, String title, String description,
-                               int priority, int estimatedMinutes) {
+                               int priority, int estimatedMinutes, UserInterface ui) {
             this.scheduleable = s;
             this.dateTime = new SimpleStringProperty(dateTime);
             this.category = new SimpleStringProperty(category);
@@ -329,7 +358,10 @@ public class UserInterface extends Application {
             this.description = new SimpleStringProperty(description);
             this.completed = new SimpleBooleanProperty(s instanceof Task t && t.isCompleted());
             this.completed.addListener((obs, oldVal, newVal) -> {
-                if (s instanceof Task t) t.setCompleted(newVal);
+                if (s instanceof Task t) {
+                    t.setCompleted(newVal);
+                    ui.saveToFile();
+                }
             });
             this.priority = new SimpleIntegerProperty(priority);
             this.estimatedMinutes = new SimpleIntegerProperty(estimatedMinutes);
